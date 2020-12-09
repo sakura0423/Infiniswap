@@ -57,9 +57,12 @@ int submit_queues; // num of available cpu (also connections)
 struct list_head g_IS_sessions;
 struct mutex g_lock;
 int NUM_CB;	// num of server/cb
-
+extern int read_
 inline int IS_set_device_state(struct IS_file *xdev,
 				 enum IS_dev_state state)
+
+int read_count = 0;
+int write_count = 0;
 {
 	int ret = 0;
 
@@ -368,7 +371,7 @@ int IS_transfer_chunk(struct IS_file *xdev, struct kernel_cb *cb, int cb_index, 
 {
 	struct timeval tv;
     do_gettimeofday(&tv);
-	pr_info("IS_transfer_chunk: %ld called!!!\nread:%d\nwrite:%dn", tv.tv_sec, read_count, write_count);
+	pr_info("IS_transfer_chunk: %ld called!!!\nread:%d\nwrite:%d\n", tv.tv_sec, read_count, write_count);
 
 	struct IS_connection *IS_conn = q->IS_conn;
 	int cpu, retval = 0;
@@ -379,7 +382,7 @@ int IS_transfer_chunk(struct IS_file *xdev, struct kernel_cb *cb, int cb_index, 
 	if (write){
 		do_gettimeofday(&tv);
 		write_count++;
-		pr_info("IS_transfer_chunk: %ld write!!!\n", tv.tv_sec);
+		pr_info("IS_transfer_chunk: %ld write!!!\nread:%d\nwrite:%d\n", tv.tv_sec, read_count, write_count);
 		retval = IS_rdma_write(IS_conn, cb, cb_index, chunk_index, chunk, offset, len, req, q); 
 		if (unlikely(retval)) {
 			pr_err("failed to map sg\n");
@@ -388,7 +391,7 @@ int IS_transfer_chunk(struct IS_file *xdev, struct kernel_cb *cb, int cb_index, 
 	}else{
 		do_gettimeofday(&tv);
 		read_count++;
-		pr_info("IS_transfer_chunk: %ld read!!!\n", tv.tv_sec);
+		pr_info("IS_transfer_chunk: %ld read!!!\nread:%d\nwrite:%d\n", tv.tv_sec, read_count, write_count);
 		retval = IS_rdma_read(IS_conn, cb, cb_index, chunk_index, chunk, offset, len, req, q); 
 		if (unlikely(retval)) {
 			pr_err("failed to map sg\n");

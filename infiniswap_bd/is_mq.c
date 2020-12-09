@@ -535,7 +535,7 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 		}
 	}
 	do_gettimeofday(&tv);
-	pr_info("IS_request: %ld finished!!!---------------------------\nread:%d\nwrite:%d\n", tv.tv_sec, read_count, write_count);
+	pr_info("IS_request: %ld finished!!!---------------------------\n", tv.tv_sec);
 	if (unlikely(err))
 		pr_err("transfer failed for req %p\n", req);
 
