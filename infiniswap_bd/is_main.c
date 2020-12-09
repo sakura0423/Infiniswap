@@ -62,7 +62,6 @@ int write_count = 0;
 
 
 
-extern int read_
 inline int IS_set_device_state(struct IS_file *xdev,
 				 enum IS_dev_state state)
 {

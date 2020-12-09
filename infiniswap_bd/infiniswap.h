@@ -143,9 +143,6 @@ struct raio_iocb {
 	} u;
 };
 
-//int read_count = 0;
-//int write_count = 0;
-
 #define LAST_IN_BATCH sizeof(uint32_t)
 
 #define SUBMIT_HEADER_SIZE (SUBMIT_BLOCK_SIZE +	    \
