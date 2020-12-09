@@ -366,6 +366,10 @@ int IS_transfer_chunk(struct IS_file *xdev, struct kernel_cb *cb, int cb_index, 
 		  unsigned long len, int write, struct request *req,
 		  struct IS_queue *q)
 {
+	struct timeval tv;
+    do_gettimeofday(&tv);
+	pr_info("IS_transfer_chunk: %ld called!!!\nread:%d\nwrite:%dn", tv.tv_sec, read_count, write_count);
+
 	struct IS_connection *IS_conn = q->IS_conn;
 	int cpu, retval = 0;
 
@@ -373,12 +377,18 @@ int IS_transfer_chunk(struct IS_file *xdev, struct kernel_cb *cb, int cb_index, 
 	
 
 	if (write){
+		do_gettimeofday(&tv);
+		write_count++;
+		pr_info("IS_transfer_chunk: %ld write!!!\n", tv.tv_sec);
 		retval = IS_rdma_write(IS_conn, cb, cb_index, chunk_index, chunk, offset, len, req, q); 
 		if (unlikely(retval)) {
 			pr_err("failed to map sg\n");
 			goto err;
 		}
 	}else{
+		do_gettimeofday(&tv);
+		read_count++;
+		pr_info("IS_transfer_chunk: %ld read!!!\n", tv.tv_sec);
 		retval = IS_rdma_read(IS_conn, cb, cb_index, chunk_index, chunk, offset, len, req, q); 
 		if (unlikely(retval)) {
 			pr_err("failed to map sg\n");

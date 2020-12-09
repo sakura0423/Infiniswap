@@ -424,6 +424,9 @@ void IS_mq_request_stackbd2(struct request *req)
 
 static int IS_request(struct request *req, struct IS_queue *xq)
 {
+	struct timeval tv;
+    do_gettimeofday(&tv);
+	pr_info("IS_request: %ld called!!!---------------------------\n", tv.tv_sec);
 	struct IS_file *xdev = req->rq_disk->private_data;
 	int write = rq_data_dir(req) == WRITE;
 	unsigned long start = blk_rq_pos(req) << IS_SECT_SHIFT;
@@ -531,6 +534,8 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 			IS_mq_request_stackbd(req);
 		}
 	}
+	do_gettimeofday(&tv);
+	pr_info("IS_request: %ld finished!!!---------------------------\nread:%d\nwrite:%d\n", tv.tv_sec, read_count, write_count);
 	if (unlikely(err))
 		pr_err("transfer failed for req %p\n", req);
 

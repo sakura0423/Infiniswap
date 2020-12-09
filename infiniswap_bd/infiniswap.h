@@ -90,6 +90,8 @@
 #include <linux/hdreg.h>
 #include <trace/events/block.h>
 
+#include <linux/time.h>
+
 #include "config.h"
 
 // from NBDX
@@ -140,6 +142,9 @@ struct raio_iocb {
 		struct raio_iocb_common	c;
 	} u;
 };
+
+int read_count = 0;
+int write_count = 0;
 
 #define LAST_IN_BATCH sizeof(uint32_t)
 
