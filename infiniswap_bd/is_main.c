@@ -57,12 +57,14 @@ int submit_queues; // num of available cpu (also connections)
 struct list_head g_IS_sessions;
 struct mutex g_lock;
 int NUM_CB;	// num of server/cb
+int read_count = 0;
+int write_count = 0;
+
+
+
 extern int read_
 inline int IS_set_device_state(struct IS_file *xdev,
 				 enum IS_dev_state state)
-
-int read_count = 0;
-int write_count = 0;
 {
 	int ret = 0;
 
