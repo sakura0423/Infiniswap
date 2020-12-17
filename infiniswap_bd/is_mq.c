@@ -52,6 +52,11 @@
 #define LOOKUP_BDEV(x) lookup_bdev(x)
 #endif
 
+int global_r = 0; //read
+int global_w = 0; //write
+int global_e = 0; //err
+int global_c = 0; //called of IS_request
+int global_f = 0; //finshed of IS_request
 
 void IS_stackbd_end_io(struct bio *bio, int err)
 {
@@ -98,6 +103,7 @@ static void stackbd_io_fn(struct bio *bio)
 	
 	generic_make_request(bio);
 }
+
 static int stackbd_threadfn(void *data)
 {
     struct bio *bio;
@@ -119,6 +125,7 @@ static int stackbd_threadfn(void *data)
     }
     return 0;
 }
+
 void stackbd_make_request5(struct bio *bio)
 {
     spin_lock_irq(&stackbd.lock);
@@ -426,7 +433,8 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 {
 	struct timeval tv;
     do_gettimeofday(&tv);
-	pr_info("IS_request: %ld called!!!---------------------------\n", tv.tv_sec);
+	global_c++;
+	pr_info("IS_request: %ld called!!!--------------------------- %d\n", tv.tv_sec,global_c);
 	struct IS_file *xdev = req->rq_disk->private_data;
 	int write = rq_data_dir(req) == WRITE;
 	unsigned long start = blk_rq_pos(req) << IS_SECT_SHIFT;
@@ -460,6 +468,7 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 		IS_sess->read_ops[gb_index] += 1;
 		spin_unlock_irq(&IS_sess->read_ops_lock[gb_index]);
 	}
+
 
 	if (gb_index == end_index) { // it's in the same CHUNK
 		cb_index = atomic_read(IS_sess->cb_index_map + gb_index);	
@@ -511,6 +520,8 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 	}
 
 	if (write){
+		global_w++;
+		pr_info("IS_request:global write!  w: %d  r:%d \n",global_w, global_r);
 		// if rdma_dev_off, go to disk
 		if (atomic_read(&IS_sess->rdma_on) == DEV_RDMA_ON){
 		
@@ -523,6 +534,8 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 			IS_mq_request_stackbd(req);	
 		}
 	}else{	//read is always single page
+		global_r++;
+		pr_info("IS_request:global read!  w: %d  r:%d \n",global_w, global_r);
 		if (atomic_read(&IS_sess->rdma_on) == DEV_RDMA_ON){
 			bitmap_i = (int)(chunk_offset / IS_PAGE_SIZE);
 			if (IS_bitmap_test(chunk->bitmap_g, bitmap_i)){ //remote recorded
@@ -535,7 +548,9 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 		}
 	}
 	do_gettimeofday(&tv);
-	pr_info("IS_request: %ld finished!!!---------------------------\n", tv.tv_sec);
+
+	global_f++;
+	pr_info("IS_request: %ld finished!!!--------------------------- %d\n", tv.tv_sec, global_f);
 	if (unlikely(err))
 		pr_err("transfer failed for req %p\n", req);
 
