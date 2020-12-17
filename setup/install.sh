@@ -24,7 +24,7 @@ max_remote_memory=32    #also for daemon
 
 #stackbd (backup) disk size, also the total size of remote memory of this bd
 #(STACKBD_SIZE), default is 12
-stackbd_size=12
+stackbd_size=32
 
 #name of stackbd disk
 #(STACKBD_NAME), default is "stackbd"
