@@ -431,10 +431,11 @@ void IS_mq_request_stackbd2(struct request *req)
 
 static int IS_request(struct request *req, struct IS_queue *xq)
 {
-	struct timeval tv;
-    do_gettimeofday(&tv);
+	struct timeval tv, g_tv, start_tv, end_tv;
 	global_c++;
-	pr_info("IS_request: %ld called!!!--------------------------- %d\n", tv.tv_sec,global_c);
+    do_gettimeofday(&tv);
+	pr_info("IS_request: %ld:%ld called!!!--------------------------- %d\n",tv.tv_sec, tv.tv_usec,global_c);
+	
 	struct IS_file *xdev = req->rq_disk->private_data;
 	int write = rq_data_dir(req) == WRITE;
 	unsigned long start = blk_rq_pos(req) << IS_SECT_SHIFT;
@@ -526,7 +527,10 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 		if (atomic_read(&IS_sess->rdma_on) == DEV_RDMA_ON){
 		
 			if (status == 1){//single chunk
+				do_gettimeofday(&start_tv);
 				err = IS_transfer_chunk(xdev, cb, cb_index, chunk_index, chunk, chunk_offset, len, write, req, xq);
+				do_gettimeofday(&end_tv);
+				pr_info("IS_request:IS_transfer_chunk called!!! time :%ld---------------------------\n", (end_tv.tv_sec-start_tv.tv_sec)*1000000+(end_tv.tv_usec-start_tv.tv_usec));
 			}else{//two chunks (won't be executed)
 				IS_mq_request_stackbd(req);
 			}
@@ -539,7 +543,10 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 		if (atomic_read(&IS_sess->rdma_on) == DEV_RDMA_ON){
 			bitmap_i = (int)(chunk_offset / IS_PAGE_SIZE);
 			if (IS_bitmap_test(chunk->bitmap_g, bitmap_i)){ //remote recorded
+				do_gettimeofday(&start_tv);
 				err = IS_transfer_chunk(xdev, cb, cb_index, chunk_index, chunk, chunk_offset, len, write, req, xq);
+				do_gettimeofday(&end_tv);
+				pr_info("IS_request:IS_transfer_chunk called!!! time :%ld---------------------------\n", (end_tv.tv_sec-start_tv.tv_sec)*1000000+(end_tv.tv_usec-start_tv.tv_usec));
 			}else {
 				IS_mq_request_stackbd(req);	
 			}
@@ -547,10 +554,12 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 			IS_mq_request_stackbd(req);
 		}
 	}
-	do_gettimeofday(&tv);
+	do_gettimeofday(&g_tv);
 
 	global_f++;
-	pr_info("IS_request: %ld finished!!!--------------------------- %d\n", tv.tv_sec, global_f);
+	pr_info("IS_request: %ld:%ld called!!!--------------------------- %d\n",g_tv.tv_sec, g_tv.tv_usec, global_f);
+	pr_info("IS_request called!!! time: %ld--------------------------- %d\n",(g_tv.tv_sec-tv.tv_sec)*1000000+(g_tv.tv_usec-tv.tv_usec));
+
 	if (unlikely(err))
 		pr_err("transfer failed for req %p\n", req);
 
