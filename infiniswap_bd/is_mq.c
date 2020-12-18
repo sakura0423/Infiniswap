@@ -558,7 +558,7 @@ static int IS_request(struct request *req, struct IS_queue *xq)
 
 	global_f++;
 	pr_info("IS_request: %ld:%ld called!!!--------------------------- %d\n",g_tv.tv_sec, g_tv.tv_usec, global_f);
-	pr_info("IS_request called!!! time: %ld--------------------------- %d\n",(g_tv.tv_sec-tv.tv_sec)*1000000+(g_tv.tv_usec-tv.tv_usec));
+	pr_info("IS_request finsh!!! time: %ld--------------------------- %d\n",(g_tv.tv_sec-tv.tv_sec)*1000000+(g_tv.tv_usec-tv.tv_usec));
 
 	if (unlikely(err))
 		pr_err("transfer failed for req %p\n", req);
