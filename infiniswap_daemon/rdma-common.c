@@ -244,7 +244,10 @@ void rdma_session_init(struct rdma_session *sess){
   }
   sess->conn_num = 0;
 
-  printf("%s, allocated mem %d\n", __func__, sess->rdma_remote.size_gb);
+
+  printf("%s, init allocated mem %d\n", __func__, sess->rdma_remote.size_gb);
+// add code
+  printf("%s, init mapped mem %d\n", __func__, sess->rdma_remote.mapped_size);
 
 }
 
@@ -427,7 +430,8 @@ void* free_mem(void *data)
   while (running) {// server is working
     free_mem_g = (int)(get_free_mem() / ONE_MB);
     //need a filter
-    filtered_free_mem_g = (int)(CURR_FREE_MEM_WEIGHT * free_mem_g + last_free_mem_g * last_free_mem_weight); 
+    filtered_free_mem_g = (int)(CURR_FREE_MEM_WEIGHT * free_mem_g + last_free_mem_g * last_free_mem_weight);
+    printf("%s, is called, last %d GB, weight: %f, %f\n",__func__, last_free_mem_g, (float)(CURR_FREE_MEM_WEIGHT), last_free_mem_weight) 
     last_free_mem_g = filtered_free_mem_g;
     if (filtered_free_mem_g < FREE_MEM_EVICT_THRESHOLD){
       evict_hit_count += 1;
@@ -472,6 +476,9 @@ void* free_mem(void *data)
     }
     // printf("\n"); 
     sleep(1); 
+    printf("%s, allocated mem %d \n",__func__, session.rdma_remote.size_gb);
+    printf("%s, mapped mem %d \n",__func__, session.rdma_remote.mapped_size);
+
   }
   return NULL;
 }
