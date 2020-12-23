@@ -430,8 +430,8 @@ void* free_mem(void *data)
   while (running) {// server is working
     free_mem_g = (int)(get_free_mem() / ONE_MB);
     //need a filter
+    printf("%s, is called, last %d GB, weight: %f, %f\n",__func__, last_free_mem_g, (float)(CURR_FREE_MEM_WEIGHT), last_free_mem_weight);
     filtered_free_mem_g = (int)(CURR_FREE_MEM_WEIGHT * free_mem_g + last_free_mem_g * last_free_mem_weight);
-    printf("%s, is called, last %d GB, weight: %f, %f\n",__func__, last_free_mem_g, (float)(CURR_FREE_MEM_WEIGHT), last_free_mem_weight) 
     last_free_mem_g = filtered_free_mem_g;
     if (filtered_free_mem_g < FREE_MEM_EVICT_THRESHOLD){
       evict_hit_count += 1;
